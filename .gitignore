@@ -9,6 +9,12 @@
 *.index
 *.onnx
 *.pth
+# Ignore notebook files that were used for tests
+*.ipynb
+.ipynb_checkpoints
+# Ignore test folders
+tests
+models
 # Byte-compiled / optimized / DLL files
 __pycache__/
 # Environments

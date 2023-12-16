@@ -17,10 +17,18 @@ Sometimes you can encounter bbox errors. One solution can be to:
 ### CHANGE HISTORY (started this in 16.12.2023)
 - 16.12.2022 - function to get embeddings from a given folder
 
+### Main idea
+I will be given a list of new unique_ids, but in this list there also exist old ids. I have to keep old (non-changed) ids 
+and vectorize new ones. So, I have to get new ids from the given list, by comparing it with my old ones. 
+
 ### TO-DO
+- [ ] Get New IDs and subtract Old ones to get list of unique ids that you have to vectorize
+- [ ] Or get new folder with images -> get a list of images -> remain only elements that exist in B (new) that are not like A (old) -> you get unique vectors -> get their embeddings
+- [ ] Function to get embeddings from a given paths of face images
 - [ ] Function to get embeddings from a given folder of face images
 - [ ] Function to save embeddings in chunks of 10000 in pickle files (unique_id, vector)
-- [ ] Function to create a FAISS index by reading chunked (10000) embeddings from some folder
+- [ ] Function to create FAISS index by reading chunked (10000) embeddings from some folder
+- [ ] Function to create FAISS index from two given folders (previous and current) - replace old ones with new
 - [ ] Add docker images to docker hub and update readme
 - [ ] Create documentation (dev, user)
 - [ ] Try ScaNN
