@@ -176,14 +176,14 @@ class Vectorization:
             return None
 
 
-    def vectorize_delta_folder(self, image_folder, output_folder, vectors_per_pickle):
+    def vectorize_delta_folder(self, input_image_folder, output_folder, vectors_per_pickle):
         """Gets embeddings from the collection of images
 
         Parameters
         ----------
-        image_folder : str
+        input_image_folder : str
             Directory where new images were placed
-        output_folder : str
+        pickles_output_folder : str
             Repository to store pickles with vectors
         vectors_per_pickle : int
             Amount of vectors to store in one pickle file in a chunk of pickles
@@ -195,9 +195,9 @@ class Vectorization:
         bad_cropped
             dictionary that stores names of non-processable images
         """
-        log = self.get_logger(output_folder, image_folder)
+        log = self.get_logger(output_folder, input_image_folder)
         # IM_FOLDER = self.data_root + image_folder
-        if len(os.listdir(image_folder)) != 0:
+        if len(os.listdir(input_image_folder)) != 0:
             PICKLES_FOLDER = output_folder + 'PICKLES_FOLDER'
             if not os.path.exists(PICKLES_FOLDER):
                 os.makedirs(PICKLES_FOLDER)
@@ -208,7 +208,7 @@ class Vectorization:
                os.makedirs(BAD_IMAGES)
                log_message = {'status': 'success', 'message': 'BAD_IMAGES folder created'}
                log.info(log_message)
-            log_message = {'status': 'success', 'message': 'Images amount in IM_FOLDER obtained.', 'amount': len(os.listdir(image_folder))}
+            log_message = {'status': 'success', 'message': 'Images amount in IM_FOLDER obtained.', 'amount': len(os.listdir(input_image_folder))}
             log.info(log_message)
 
             vector_dict = {}
@@ -219,10 +219,10 @@ class Vectorization:
             start = time.time()
 
             # Main loop
-            for image in os.listdir(image_folder):
+            for image in os.listdir(input_image_folder):
                 #print(image)
                 # Getting current image from folder
-                current = os.path.join(image_folder, image)
+                current = os.path.join(input_image_folder, image)
                 # print(current)
                 # Obtaining ud_code value to store it as an ID
                 ud_code = image.split('.')[0]
@@ -268,12 +268,12 @@ class Vectorization:
                 log.info(log_message)
 
             end = time.time()
-            log_message = {'status': 'finished', 'message': 'DELTA_PROCESSING_FINISHED', 'processed_amount': len(os.listdir(image_folder)), 'time_spent': end - start}
+            log_message = {'status': 'finished', 'message': 'DELTA_PROCESSING_FINISHED', 'processed_amount': len(os.listdir(input_image_folder)), 'time_spent': end - start}
             log.info(log_message)
 
             return vector_dict
         else:
-            log_message = {'status': 'error', 'message': 'NO_IMAGE_IN_SOURCE_FOLDER', 'processed_amount': len(os.listdir(image_folder))}
+            log_message = {'status': 'error', 'message': 'NO_IMAGE_IN_SOURCE_FOLDER', 'processed_amount': len(os.listdir(input_image_folder))}
             log.info(log_message)
             return None
 
