@@ -1,0 +1,33 @@
+version: '3'
+services:
+  vector_db_api:
+    image: mx_torch:jupyter_dbscan_faiss_fastapi
+    # network_mode: "host"
+    container_name: mvd_vectorization_api
+    restart: unless-stopped
+    working_dir: /api_folder/app
+    volumes:
+      - /home/talgat/PROJECTS/TENGRI/vector_db_api:/api_folder
+      - /DATA_ROOT:/data_root
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "20040:8887"
+    shm_size: 1g
+    ulimits:
+      memlock: -1
+      stack: 67108864
+    # command: uvicorn main:app --host 0.0.0.0 --port 8887 --forwarded-allow-ips "*" --reload # --workers 6 --log-level debug
+    command: tail -f /dev/null
+    #command: sh -c "sleep 10s && uvicorn main:app --reload --host 0.0.0.0 --port 3333 --workers 10 --forwarded-allow-ips '*'"
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+      - PROJECT_SRC_RT=/api_folder
+      - LC_ALL=C.UTF-8
+      - LANG=C.UTF-8
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

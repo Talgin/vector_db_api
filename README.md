@@ -23,12 +23,11 @@ and vectorize new ones. So, I have to get new ids from the given list, by compar
 
 ### TO-DO
 - [ ] Get New IDs and subtract Old ones to get list of unique ids that you have to vectorize
-- [ ] Or get new folder with images -> get a list of images -> remain only elements that exist in B (new) that are not like A (old) -> you get unique vectors -> get their embeddings
-- [ ] Function to get embeddings from a given paths of face images
 - [ ] Function to get embeddings from a given folder of face images
-- [ ] Function to save embeddings in chunks of 10000 in pickle files (unique_id, vector)
+- [ ] Function to save embeddings in chunks of 10000 in pickle files (unique_id, vector) in a /PICKLES/date folder
 - [ ] Function to create FAISS index by reading chunked (10000) embeddings from some folder
-- [ ] Function to create FAISS index from two given folders (previous and current) - replace old ones with new
+- [ ] Function to create FAISS index from two given folders (previous and current) - include in a final.index only those that are in a new table
+- [ ] Function to get embeddings from a given paths of face images
 - [ ] Add docker images to docker hub and update readme
 - [ ] Create documentation (dev, user)
 - [ ] Try ScaNN
