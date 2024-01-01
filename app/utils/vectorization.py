@@ -36,8 +36,6 @@ class Vectorization:
         minimum head size in the frame (in pixels)
     data_root : str
         root folder from where to get data (images to be processed)
-    debug : bool
-        If set to True then everything will be running with test folders and in test environment
 
     Methods
     -------
@@ -50,7 +48,7 @@ class Vectorization:
     vectorize_delta_folder(image_folder)
         Gets embeddings from the collection of images
     """
-    def __init__(self, detection_model, recognition_model, detection_threshold, img_size, min_head_size, data_root, debug=True):
+    def __init__(self, detection_model, recognition_model, detection_threshold, img_size, min_head_size):
         deviceID = GPUtil.getFirstAvailable(order = 'first', maxLoad=0.6, maxMemory=0.75, attempts=1, interval=20, verbose=False)
         self.gpu_id = None
         if len(deviceID) > 0:
@@ -68,8 +66,6 @@ class Vectorization:
         self.det_type = 0
         self.flip = 0
         self.min_head_size = min_head_size
-        self.data_root = data_root
-        self.debug = debug
         os.environ["MXNET_CUDNN_AUTOTUNE_DEFAULT"]="0"
         os.environ["MXNET_CPU_WORKER_NTHREADS"]="24"
         os.environ["MXNET_ENGINE_TYPE"]="ThreadedEnginePerDevice"
@@ -180,13 +176,17 @@ class Vectorization:
             return None
 
 
-    def vectorize_delta_folder(self, image_folder, output_folder):
+    def vectorize_delta_folder(self, image_folder, output_folder, vectors_per_pickle):
         """Gets embeddings from the collection of images
 
         Parameters
         ----------
         image_folder : str
-            Location of the images collection
+            Directory where new images were placed
+        output_folder : str
+            Repository to store pickles with vectors
+        vectors_per_pickle : int
+            Amount of vectors to store in one pickle file in a chunk of pickles
 
         Returns
         -------
@@ -196,13 +196,8 @@ class Vectorization:
             dictionary that stores names of non-processable images
         """
         log = self.get_logger(output_folder, image_folder)
-        print('debug:', type(self.debug), self.debug)
-        #if self.debug:
-        #    folder = '/test_photo'
-        #else:
-        #    folder = '/photo'
-        IM_FOLDER = self.data_root + image_folder
-        if len(os.listdir(IM_FOLDER)) != 0:
+        # IM_FOLDER = self.data_root + image_folder
+        if len(os.listdir(image_folder)) != 0:
             PICKLES_FOLDER = output_folder + 'PICKLES_FOLDER'
             if not os.path.exists(PICKLES_FOLDER):
                 os.makedirs(PICKLES_FOLDER)
@@ -213,7 +208,7 @@ class Vectorization:
                os.makedirs(BAD_IMAGES)
                log_message = {'status': 'success', 'message': 'BAD_IMAGES folder created'}
                log.info(log_message)
-            log_message = {'status': 'success', 'message': 'Images amount in IM_FOLDER obtained.', 'amount': len(os.listdir(IM_FOLDER))}
+            log_message = {'status': 'success', 'message': 'Images amount in IM_FOLDER obtained.', 'amount': len(os.listdir(image_folder))}
             log.info(log_message)
 
             vector_dict = {}
@@ -224,10 +219,10 @@ class Vectorization:
             start = time.time()
 
             # Main loop
-            for image in os.listdir(IM_FOLDER):
+            for image in os.listdir(image_folder):
                 #print(image)
                 # Getting current image from folder
-                current = os.path.join(IM_FOLDER, image)
+                current = os.path.join(image_folder, image)
                 # print(current)
                 # Obtaining ud_code value to store it as an ID
                 ud_code = image.split('.')[0]
@@ -237,9 +232,9 @@ class Vectorization:
                     if vector is not None and len(vector) > 0:
                         vector_dict[ud_code] = list(vector)
                         image_counter += 1
-                        if image_counter!= 0 and image_counter%1000==0:
+                        if image_counter!= 0 and image_counter%vectors_per_pickle==0:
                             if bool(vector_dict):
-                                with open(PICKLES_FOLDER + '/' + str(image_counter) + '_' + image_folder + '_stars.pickle', 'wb') as handle:
+                                with open(PICKLES_FOLDER + '/' + str(image_counter) + '.pickle', 'wb') as handle:
                                     pickle.dump(vector_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
                                 # print('All pickles are written', len(vector_dict))
                                 log_message = {'status': 'success', 'message': 'PICKLES_ARE_WRITTEN', 'AMOUNT': len(vector_dict)}
@@ -261,10 +256,10 @@ class Vectorization:
                     break
             # If there exist embeddings in vector_dict we have to write them into our pickle file
             if bool(vector_dict):
-                with open(PICKLES_FOLDER + '/' + str(image_counter) + '_' + image_folder + '_stars.pickle', 'wb') as handle:
+                with open(PICKLES_FOLDER + '/' + str(image_counter) + '.pickle', 'wb') as handle:
                     pickle.dump(vector_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
                 # print('All pickles are written', len(vector_dict))
-                log_message = {'status': 'success', 'message': 'PICKLES_ARE_WRITTEN', 'AMOUNT': len(vector_dict)}
+                log_message = {'status': 'success', 'message': 'LAST_PICKLES_ARE_WRITTEN', 'AMOUNT': len(vector_dict)}
                 log.info(log_message)
             if bool(bad_cropped):
                 with open(BAD_IMAGES + '/' + 'errors.json', 'a') as f:
@@ -273,22 +268,22 @@ class Vectorization:
                 log.info(log_message)
 
             end = time.time()
-            log_message = {'status': 'finished', 'message': 'DELTA_PROCESSING_FINISHED', 'processed_amount': len(os.listdir(IM_FOLDER)), 'time_spent': end - start}
+            log_message = {'status': 'finished', 'message': 'DELTA_PROCESSING_FINISHED', 'processed_amount': len(os.listdir(image_folder)), 'time_spent': end - start}
             log.info(log_message)
 
             return vector_dict
         else:
-            log_message = {'status': 'finished', 'message': 'NO_IMAGE_IN_SOURCE', 'processed_amount': len(os.listdir(IM_FOLDER))}
+            log_message = {'status': 'error', 'message': 'NO_IMAGE_IN_SOURCE_FOLDER', 'processed_amount': len(os.listdir(image_folder))}
             log.info(log_message)
             return None
 
 
     def create_tar(self, image_folder):
         folder_list = None
-        if self.debug:
-            folder_list = ['pickles', 'test_photo', 'jsons']
-        else:
-            folder_list = ['pickles', 'photo', 'jsons']
+        # if self.debug:
+        #     folder_list = ['pickles', 'test_photo', 'jsons']
+        # else:
+        #     folder_list = ['pickles', 'photo', 'jsons']
         tar = tarfile.open(self.data_root + image_folder + '/' + image_folder + '.tar.gz', 'w:gz')
         try:
             for file in folder_list:
