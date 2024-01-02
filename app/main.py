@@ -38,7 +38,7 @@ async def process_folder(response: Response, background_tasks: BackgroundTasks, 
         return {'status': 'success', 'message': 'Sent to process', 'date_folder': todays_folder, 'unique_id': img_name, 'video_folder': new_img_folder}
 
 
-@app.post("/faiss/process_folder/", status_code=200)
+@app.post("/faiss/get_folder_embeddings", status_code=200)
 async def process_folder(response: Response, background_tasks: BackgroundTasks, new_photos_folder: str = Form(...)):
     if not os.path.exists(os.path.join(settings.UPDATE_PHOTOS_DIR, new_photos_folder)):
         response.status_code = status.HTTP_404_NOT_FOUND

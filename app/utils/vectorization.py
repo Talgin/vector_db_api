@@ -9,8 +9,7 @@ import os, sys
 import time
 import json
 import pickle
-import configargparse
-from logbook import Logger, NestedSetup, NullHandler, FileHandler, MailHandler, Processor, StreamHandler
+from logbook import Logger, FileHandler, Processor, StreamHandler
 import logbook
 import GPUtil
 import tarfile
@@ -198,7 +197,7 @@ class Vectorization:
         log = self.get_logger(output_folder, input_image_folder)
         # IM_FOLDER = self.data_root + image_folder
         if len(os.listdir(input_image_folder)) != 0:
-            PICKLES_FOLDER = output_folder + 'PICKLES_FOLDER'
+            PICKLES_FOLDER = output_folder + '/pickles'
             if not os.path.exists(PICKLES_FOLDER):
                 os.makedirs(PICKLES_FOLDER)
                 log_message = {'status': 'success', 'message': 'PICKLES_FOLDER folder created'}

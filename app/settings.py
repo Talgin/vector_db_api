@@ -16,8 +16,8 @@ UPDATE_FAISS_DIR = '/TENGRI/STORAGE/update_indexes'
 VECTORS_PER_PICKLE = 10000
 
 # Settings of detector and feature extractor (recognition)
-DET_MODEL = '/models/detection/R50'
-REC_MODEL ='/models/recognition/model,0'
+DET_MODEL = '/api_folder/models/detection/R50'
+REC_MODEL ='/api_folder/models/recognition/model,0'
 
 DET_THRESHOLD = 0.95
 IMG_SIZE = '112,112'
