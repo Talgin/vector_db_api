@@ -39,7 +39,27 @@ async def process_folder(response: Response, background_tasks: BackgroundTasks, 
 
 
 @app.post("/faiss/get_folder_embeddings", status_code=200)
-async def process_folder(response: Response, background_tasks: BackgroundTasks, new_photos_folder: str = Form(...)):
+async def get_folder_embeddings(response: Response, background_tasks: BackgroundTasks, new_photos_folder: str = Form(...)):
+    """Obtaining the embeddings from the given directory with delta images
+
+    Parameters
+    ----------
+    new_photos_folder : str
+        Name of the directory with images
+
+    Returns
+    -------
+    status
+        success or error
+    message
+        message explaining the status
+    input_images_folder
+        name of the input images folder
+    output_folder
+        name of the output folder
+    images_to_process
+        amount of images to be processed      
+    """
     if not os.path.exists(os.path.join(settings.UPDATE_PHOTOS_DIR, new_photos_folder)):
         response.status_code = status.HTTP_404_NOT_FOUND
         return {'status': 'error', 
@@ -67,5 +87,7 @@ async def process_folder(response: Response, background_tasks: BackgroundTasks, 
                 'input_images_folder': input_photos_folder, 
                 'output_folder': output_pickles_folder, 
                 'images_to_process': images_amount}
+
+
 
 

@@ -47,7 +47,7 @@ class FaceModel:
     image_size = (int(_vec[0]), int(_vec[1]))
     self.model = None
     self.ga_model = None
-    print('len model', len(model))
+    # print('len model', len(model))
     if len(model)>0:
       self.model = get_model(ctx, image_size, model, 'fc1')
     if len(ga_model)>0:
@@ -80,7 +80,7 @@ class FaceModel:
     #print(points)
     nimg = face_preprocess.preprocess(face_img, bbox, points, image_size='112,112')
     cv2.imwrite('preprocessed.jpg', nimg)
-    print('yes')
+    # print('yes')
     #nimg = face_preprocess.preprocess(face_img, bbox, points, image_size='112,112', mode='gray')
     nimg = cv2.cvtColor(nimg, cv2.COLOR_BGR2RGB)
     aligned = np.transpose(nimg, (2,0,1))

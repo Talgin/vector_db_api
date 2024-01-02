@@ -73,13 +73,13 @@ class Vectorization:
         self.recognitor = FaceModel(self.gpu_id, self.recognition_model, self.ga_model, self.threshold, self.det_type, self.flip, self.img_size)
 
 
-    def get_logger(self, data_root_folder, image_folder_name):
+    def get_logger(self, output_folder, image_folder_name):
         """Creates a logger object with given parameters and creates a folder where the current log is saved
 
         Parameters
         ----------
-        data_root_folder : str
-            The location of the root folder where to get and save data
+        output_folder : str
+            Location of the directory to save created data
         image_folder_name : str
             Name of the currently obtained image folder (e.g. '21_07_05_16_37', 'some_dataset', etc.)
 
@@ -88,14 +88,13 @@ class Vectorization:
         Logger object
             Logger object that can be used to log events
         """
-        logs_folder = data_root_folder + '/logs/'
-        print(logs_folder)
+        logs_folder = os.path.join(output_folder, 'logs')
         if not os.path.exists(logs_folder):
             os.makedirs(logs_folder)
-            print('Logs folder created.')
+        logs_file = os.path.join(logs_folder, 'project_logs.log')
         logbook.set_datetime_format('local')
         logger = Logger(image_folder_name)
-        logger.handlers.append(FileHandler(logs_folder + '.log', level='DEBUG', bubble=True, mode='a', encoding='utf-8'))
+        logger.handlers.append(FileHandler(logs_file, level='DEBUG', bubble=True, mode='a', encoding='utf-8'))
         logger.handlers.append(StreamHandler(sys.stdout, level='INFO', bubble=True))
         # handler = StreamHandler(sys.stdout) if self.debug else FileHandler(logs_folder + image_folder_name + '.log', level='WARNING', mode='a', encoding='utf-8')
         # handler.push_application()
@@ -197,12 +196,12 @@ class Vectorization:
         log = self.get_logger(output_folder, input_image_folder)
         # IM_FOLDER = self.data_root + image_folder
         if len(os.listdir(input_image_folder)) != 0:
-            PICKLES_FOLDER = output_folder + '/pickles'
+            PICKLES_FOLDER = os.path.join(output_folder, 'pickles')
             if not os.path.exists(PICKLES_FOLDER):
                 os.makedirs(PICKLES_FOLDER)
-                log_message = {'status': 'success', 'message': 'PICKLES_FOLDER folder created'}
+                log_message = {'status': 'success', 'message': 'Pickles, logs folder created'}
                 log.info(log_message)
-            BAD_IMAGES = output_folder + '/jsons'
+            BAD_IMAGES = os.path.join(output_folder, 'jsons')
             if not os.path.exists(BAD_IMAGES):
                os.makedirs(BAD_IMAGES)
                log_message = {'status': 'success', 'message': 'BAD_IMAGES folder created'}
