@@ -3,6 +3,9 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent
 
+# Trained index path
+TRAINED_INDEX_PATH = '/TENGRI/STORAGE/trained_index/trained_all.index'
+
 # Directory to place newly obtained photos DIR/new_photos_dir
 UPDATE_PHOTOS_DIR = '/TENGRI/STORAGE/update_photos'
 
