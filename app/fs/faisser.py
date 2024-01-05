@@ -3,11 +3,35 @@ import numpy as np
 from shutil import copyfile
 import faiss as fs
 import os
+import pickle
 
 class Faisser:
     def __init__(self, update_pickles_dir, update_faiss_dir):
         self.update_pickles_dir = update_pickles_dir
         self.update_faiss_dir = update_faiss_dir
+
+    
+    def read_pickles(self, pickles_dir):
+        # User glob to read recursively in subfolders
+        data = None
+        identificators = []
+        vectors = []
+        for pickle_file in os.listdir(pickles_dir):
+            pickle_path = os.path.join(pickles_dir, pickle_file)
+            with open(pickle_path,"rb") as f:
+                try:
+                    data = pickle.load(f)
+                except EOFError:
+                    return {'status': 'error', 'message': 'pickle not found in ' + pickle_path}
+            for k in data.keys():
+                identificators.append(k)
+                vectors.append(data[k])
+
+        # Formatting vectors and ids
+        new_vectors = np.array(vectors, dtype=np.float32)
+        new_ids = np.array(list(map(int, identificators)))
+        
+        return new_ids, new_vectors
 
 
     def get_records_amount(self, faiss_path):

@@ -174,7 +174,7 @@ class Vectorization:
             return None
 
 
-    def vectorize_delta_folder(self, input_image_folder, output_folder, vectors_per_pickle):
+    def vectorize_delta_dir(self, input_image_folder, output_folder, vectors_per_pickle):
         """Gets embeddings from the collection of images
 
         Parameters
