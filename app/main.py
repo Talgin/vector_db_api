@@ -105,14 +105,14 @@ async def faiss_create_new_index(response: Response, background_tasks: Backgroun
             identificators.append(k)
             vectors.append(filtered_dict[k])
         # Formatting vectors and ids
-        new_vectors = np.array(vectors, dtype=np.float32)
-        new_ids = np.array(list(map(int, identificators)))
+        vectors = np.array(vectors, dtype=np.float32)
+        identificators = np.array(list(map(int, identificators)))
         # Directory to save new faiss index
         new_faiss_index_dir = os.path.join(settings.UPDATED_FINAL_INDEX, new_dir_name)
         if not os.path.exists(new_faiss_index_dir):
             os.makedirs(new_faiss_index_dir)
         try:
-            result = fs_worker.create_block_and_index(new_ids, new_vectors, settings.TRAINED_INDEX_PATH, new_faiss_index_dir)
+            result = fs_worker.create_block_and_index(identificators, vectors, settings.TRAINED_INDEX_PATH, new_faiss_index_dir)
         except:
             result = False
         if result['status'] == True:

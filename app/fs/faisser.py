@@ -39,8 +39,9 @@ class Faisser:
     def read_pickles(self):
         # User glob to read recursively in subfolders
         data = None
-        identificators = []
-        vectors = []
+        big_dict = dict()
+        # identificators = []
+        # vectors = []
         for pickle_file in glob(self.updated_pickles_dir + '/**/*.pickle'):
             # pickle_path = os.path.join(root, pickle_file)
             with open(pickle_file,"rb") as f:
@@ -48,15 +49,16 @@ class Faisser:
                     data = pickle.load(f)
                 except EOFError:
                     return {'status': 'error', 'message': 'pickle not found in ' + pickle_file}
-            for k in data.keys():
-                identificators.append(k)
-                vectors.append(data[k])
+            big_dict = {**big_dict, **data}
+            # for k in data.keys():
+            #     identificators.append(k)
+            #     vectors.append(data[k])
 
         # Formatting vectors and ids
-        new_vectors = np.array(vectors, dtype=np.float32)
-        new_ids = np.array(list(map(int, identificators)))
+        # new_vectors = np.array(vectors, dtype=np.float32)
+        # new_ids = np.array(list(map(int, identificators)))
         
-        return new_ids, new_vectors
+        return big_dict
 
 
     def get_records_amount(self, faiss_path):
