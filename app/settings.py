@@ -28,7 +28,7 @@ UPDATED_FAISS_DIR = '/TENGRI/STORAGE/updated_indexes'
 UPDATED_FINAL_INDEX = '/TENGRI/STORAGE/updated_final_index'
 
 # Amount of id:vector pairs to be stored in one pickle file
-VECTORS_PER_PICKLE = 10000
+VECTORS_PER_PICKLE = 1000 # 10000
 
 # Settings of detector and feature extractor (recognition)
 DET_MODEL = '/api_folder/models/detection/R50'

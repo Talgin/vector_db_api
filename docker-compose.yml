@@ -9,8 +9,10 @@ services:
       - /home/talgat/PROJECTS/TENGRI/vector_db_api:/api_folder
       - /TENGRI:/TENGRI
       - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - "20040:8887"
+    network_mode: host
+    # ports:
+    #   - "20040:8887"
+    #   - "20041:8899"
     shm_size: 1g
     ulimits:
       memlock: -1
