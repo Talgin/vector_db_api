@@ -1,12 +1,11 @@
 from fastapi import FastAPI, BackgroundTasks, Response, Form, status
 import settings
-import uuid
 import os
 from datetime import datetime
 from utils.vectorization import Vectorization
 from fs.faisser import Faisser
 from pathlib import Path
-import pickle
+import numpy as np
 
 app = FastAPI()
 
@@ -66,9 +65,9 @@ async def get_folder_embeddings(response: Response, background_tasks: Background
                 'images_to_process': images_amount}
 
 
-@app.post("/faiss_create_new_index", status_code=200)
+@app.post("/faiss/faiss_create_new_index", status_code=200)
 async def faiss_create_new_index(response: Response, background_tasks: BackgroundTasks, new_dir_name: str = Form(...)):
-    """Obtaining the embeddings from the given directory with delta images
+    """Create new index from new ids and vectors using records list from PostgreSQL database
 
     Parameters
     ----------
@@ -81,22 +80,33 @@ async def faiss_create_new_index(response: Response, background_tasks: Backgroun
         success or error
     message
         message explaining the status
-    input_images_folder
-        name of the input images folder
-    output_folder
-        name of the output folder
+    new_dir_name
+        name of the directory where all info of the current deltas stored
+    index-size
+        size of the newly created faiss index
     images_to_process
         amount of images to be processed
     """
     # Read ids from unique_ud_gr table to save only listed ids in a final index
+    records_from_db = fs_worker.read_ids_from_postgres_db()
+    records_from_db = [elem[0] for elem in records_from_db]
 
-
-
-
-    output_pickles_dir = os.path.join(settings.UPDATED_PICKLES_DIR, new_dir_name)
-    if os.path.exists(output_pickles_dir):
+    updated_pickles_dir = os.path.join(settings.UPDATED_PICKLES_DIR, new_dir_name)
+    if os.path.exists(updated_pickles_dir):
         # Read previously obtained pickles
-        new_ids, new_vectors = fs_worker.read_pickles()
+        pickles_dict = fs_worker.read_pickles()
+
+        # Filter ids and vectors according to the list from Postgre table
+        filtered_dict = {key: pickles_dict[key] for key in records_from_db}
+        # new_ids, new_vectors
+        identificators = []
+        vectors = []
+        for k in filtered_dict.keys():
+            identificators.append(k)
+            vectors.append(filtered_dict[k])
+        # Formatting vectors and ids
+        new_vectors = np.array(vectors, dtype=np.float32)
+        new_ids = np.array(list(map(int, identificators)))
         # Directory to save new faiss index
         new_faiss_index_dir = os.path.join(settings.UPDATED_FINAL_INDEX, new_dir_name)
         if not os.path.exists(new_faiss_index_dir):
@@ -106,12 +116,12 @@ async def faiss_create_new_index(response: Response, background_tasks: Backgroun
         except:
             result = False
         if result['status'] == True:
-            return {'status': 'success', 'index-size': result['size']}
+            return {'status': 'success', 'message': 'Successfully updated index', 'new_dir_name': new_dir_name, 'index-size': result['size'], 'new-index-path': result['path']}
         else:
             return {'status': 'error', 'message': 'Could not save new faiss in ' + new_faiss_index_dir}
     else:
         response.status_code = status.HTTP_404_NOT_FOUND
-        return {'status': 'error', 'message': 'Could not find pickles in ' + output_pickles_dir}
+        return {'status': 'error', 'message': 'Could not find pickles in ' + updated_pickles_dir}
 
 
 

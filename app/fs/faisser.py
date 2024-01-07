@@ -2,7 +2,9 @@ import psycopg2
 import numpy as np
 from shutil import copyfile
 import faiss as fs
+from faiss.contrib.ondisk import merge_ondisk
 import os
+from glob import glob
 import pickle
 
 class Faisser:
@@ -11,22 +13,44 @@ class Faisser:
         self.updated_faiss_dir = updated_faiss_dir
 
     
+    def read_ids_from_postgres_db(self, pg_server, pg_port, pg_db, pg_user, pg_pass, pg_schema_and_table):
+        try:
+            # connect to the PostgreSQL database
+            conn = psycopg2.connect(host=pg_server, port=pg_port, dbname=pg_db, user=pg_user, password=pg_pass)
+            # create a new cursor object
+            cur = conn.cursor()
+            # execute the INSERT statement
+            sql_query = """SELECT ud_code 
+                        FROM fr.unique_ud_gr"""
+            cur.execute(sql_query)
+            # commit the changes to the database
+            blob = cur.fetchall()
+            # close the communication with the PostgreSQL database
+            cur.close()
+        except Exception as error:
+            print('Error: ' + str(error))
+            return None
+        finally:
+            if conn is not None:
+                conn.close()
+        return blob
+
+    
     def read_pickles(self):
         # User glob to read recursively in subfolders
         data = None
         identificators = []
         vectors = []
-        for root, dirs, files in os.walk(self.updated_pickles_dir):
-            for pickle_file in files:
-                pickle_path = os.path.join(root, pickle_file)
-                with open(pickle_path,"rb") as f:
-                    try:
-                        data = pickle.load(f)
-                    except EOFError:
-                        return {'status': 'error', 'message': 'pickle not found in ' + pickle_path}
-                for k in data.keys():
-                    identificators.append(k)
-                    vectors.append(data[k])
+        for pickle_file in glob(self.updated_pickles_dir + '/**/*.pickle'):
+            # pickle_path = os.path.join(root, pickle_file)
+            with open(pickle_file,"rb") as f:
+                try:
+                    data = pickle.load(f)
+                except EOFError:
+                    return {'status': 'error', 'message': 'pickle not found in ' + pickle_file}
+            for k in data.keys():
+                identificators.append(k)
+                vectors.append(data[k])
 
         # Formatting vectors and ids
         new_vectors = np.array(vectors, dtype=np.float32)
@@ -75,12 +99,10 @@ class Faisser:
         result : boolean
             True or False
         """
-        trained_index = fs.read_index(trained_index_path)
-        trained_index.add_with_ids(new_vectors, new_ids)
-		
+        index = fs.read_index(trained_index_path)
+        index.add_with_ids(new_vectors, new_ids)
 		# Reading trained index and adding new vectors and ids to create new block
-        # blocks = len(os.listdir(updated_block_dir))
-        fs.write_index(trained_index, os.path.join(new_faiss_index_dir, "block.index"))
+        fs.write_index(index, os.path.join(new_faiss_index_dir, "block.index"))
 
 		# Reading created blocks 1st block is created at the beginning
         ivfs = []
@@ -105,6 +127,6 @@ class Faisser:
         # Saving final index in /updated_final_index/populated.index
         try:
             fs.write_index(index, os.path.join(new_faiss_index_dir, 'populated.index'))
-            return {'status': True, "size": index.ntotal}
+            return {'status': True, "size": index.ntotal, 'path': os.path.join(new_faiss_index_dir, 'populated.index')}
         except:
             return {'status': False, "size": None}
