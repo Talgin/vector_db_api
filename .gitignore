@@ -14,7 +14,6 @@
 .ipynb_checkpoints
 # Ignore test folders
 tests
-models
 # Byte-compiled / optimized / DLL files
 __pycache__/
 # Environments
