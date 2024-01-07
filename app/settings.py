@@ -10,10 +10,16 @@ TRAINED_INDEX_PATH = '/TENGRI/STORAGE/trained_index/trained_all.index'
 UPDATE_PHOTOS_DIR = '/TENGRI/STORAGE/update_photos'
 
 # Directory to store chunks of pickle files with newly obtained embeddings
-UPDATE_PICKLES_DIR = '/TENGRI/STORAGE/update_pickles'
+UPDATED_PICKLES_DIR = '/TENGRI/STORAGE/updated_pickles'
+
+# Directory to store update blocks
+UPDATED_BLOCKS_DIR = '/TENGRI/STORAGE/updated_blocks'
 
 # Directory to store newly created FAISS index
-UPDATE_FAISS_DIR = '/TENGRI/STORAGE/update_indexes'
+UPDATED_FAISS_DIR = '/TENGRI/STORAGE/updated_indexes'
+
+# Directory to store updated final indexes
+UPDATED_FINAL_INDEX = '/TENGRI/STORAGE/updated_final_index'
 
 # Amount of id:vector pairs to be stored in one pickle file
 VECTORS_PER_PICKLE = 10000
