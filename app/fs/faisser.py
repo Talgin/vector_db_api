@@ -8,9 +8,8 @@ from glob import glob
 import pickle
 
 class Faisser:
-    def __init__(self, updated_pickles_dir, updated_faiss_dir):
+    def __init__(self, updated_pickles_dir):
         self.updated_pickles_dir = updated_pickles_dir
-        self.updated_faiss_dir = updated_faiss_dir
 
     
     def read_ids_from_postgres_db(self, pg_server, pg_port, pg_db, pg_user, pg_pass, pg_schema_and_table):
@@ -21,7 +20,7 @@ class Faisser:
             cur = conn.cursor()
             # execute the INSERT statement
             sql_query = """SELECT ud_code 
-                        FROM fr.unique_ud_gr"""
+                        FROM {table}""".format(table=pg_schema_and_table)
             cur.execute(sql_query)
             # commit the changes to the database
             blob = cur.fetchall()
@@ -40,23 +39,13 @@ class Faisser:
         # User glob to read recursively in subfolders
         data = None
         big_dict = dict()
-        # identificators = []
-        # vectors = []
-        for pickle_file in glob(self.updated_pickles_dir + '/**/*.pickle'):
-            # pickle_path = os.path.join(root, pickle_file)
+        for pickle_file in glob(self.updated_pickles_dir + '/**/**/*.pickle'):
             with open(pickle_file,"rb") as f:
                 try:
                     data = pickle.load(f)
                 except EOFError:
                     return {'status': 'error', 'message': 'pickle not found in ' + pickle_file}
             big_dict = {**big_dict, **data}
-            # for k in data.keys():
-            #     identificators.append(k)
-            #     vectors.append(data[k])
-
-        # Formatting vectors and ids
-        # new_vectors = np.array(vectors, dtype=np.float32)
-        # new_ids = np.array(list(map(int, identificators)))
         
         return big_dict
 

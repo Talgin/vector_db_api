@@ -13,7 +13,7 @@ app = FastAPI()
 BASE_DIR = Path(__file__).resolve().parent
 print(settings.BASE_DIR)
 vectorizer = Vectorization(settings.DET_MODEL, settings.REC_MODEL, settings.DET_THRESHOLD, settings.IMG_SIZE, settings.MIN_HEAD_SIZE)
-fs_worker = Faisser(settings.UPDATED_PICKLES_DIR, settings.UPDATED_FAISS_DIR)
+fs_worker = Faisser(settings.UPDATED_PICKLES_DIR)
 
 @app.post("/faiss/get_folder_embeddings", status_code=200)
 async def get_folder_embeddings(response: Response, background_tasks: BackgroundTasks, new_photos_dir: str = Form(...)):
@@ -65,7 +65,7 @@ async def get_folder_embeddings(response: Response, background_tasks: Background
                 'images_to_process': images_amount}
 
 
-@app.post("/faiss/faiss_create_new_index", status_code=200)
+@app.post("/faiss/create_new_index", status_code=200)
 async def faiss_create_new_index(response: Response, background_tasks: BackgroundTasks, new_dir_name: str = Form(...)):
     """Create new index from new ids and vectors using records list from PostgreSQL database
 
@@ -88,14 +88,14 @@ async def faiss_create_new_index(response: Response, background_tasks: Backgroun
         amount of images to be processed
     """
     # Read ids from unique_ud_gr table to save only listed ids in a final index
-    records_from_db = fs_worker.read_ids_from_postgres_db()
+    records_from_db = fs_worker.read_ids_from_postgres_db(settings.PG_SERVER, settings.PG_PORT, settings.PG_DB, 
+                                                          settings.PG_USER, settings.PG_PASS, settings.PG_SCHEMA_AND_TABLE)
     records_from_db = [elem[0] for elem in records_from_db]
 
     updated_pickles_dir = os.path.join(settings.UPDATED_PICKLES_DIR, new_dir_name)
     if os.path.exists(updated_pickles_dir):
         # Read previously obtained pickles
         pickles_dict = fs_worker.read_pickles()
-
         # Filter ids and vectors according to the list from Postgre table
         filtered_dict = {key: pickles_dict[key] for key in records_from_db}
         # new_ids, new_vectors

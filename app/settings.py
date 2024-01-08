@@ -9,7 +9,7 @@ PG_PORT = '20005'
 PG_DB = 'fr_kpp'
 PG_USER = 'face_reco_admin'
 PG_PASS = 'qwerty123'
-PG_SCHEMA_AND_TABLE = 'fr.unique_ud_gr'
+PG_SCHEMA_AND_TABLE = 'fr.unique_ud_test' # change to fr.unique_ud_gr
 # conn = psycopg2.connect(host='167.235.199.85', port='20005', dbname='fr_kpp', user='face_reco_admin', password='qwerty123')
 
 # Trained index path

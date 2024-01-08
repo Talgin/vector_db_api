@@ -6,8 +6,9 @@ services:
     restart: unless-stopped
     working_dir: /api_folder/app
     volumes:
-      - /home/talgat/PROJECTS/TENGRI/vector_db_api:/api_folder
+      - ./:/api_folder
       - /TENGRI:/TENGRI
+      - /PROJECTS/AI/dbscan_faiss_test:/sources_dir
       - /var/run/docker.sock:/var/run/docker.sock
     network_mode: host
     # ports:
