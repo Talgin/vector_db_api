@@ -11,7 +11,7 @@ app = FastAPI()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent
-print(settings.BASE_DIR)
+
 vectorizer = Vectorization(settings.DET_MODEL, settings.REC_MODEL, settings.DET_THRESHOLD, settings.IMG_SIZE, settings.MIN_HEAD_SIZE)
 fs_worker = Faisser(settings.UPDATED_PICKLES_DIR)
 

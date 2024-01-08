@@ -7,7 +7,15 @@ The implementation of populating new face database using [Retinaface](https://do
 - Change settings.py to use either cpu or gpu (use_cpu flag)
 
 ### Running the service
+- Change PG_SERVER from settings.py to point to 127.0.0.1
+- Check that trained_all.index file is in TRAINED_INDEX_PATH (settings.py)
+- Check that there exist every path assigned in settings.py
 > docker-compose up -d
+
+### Using the service
+- Place your photos into UPDATE_PHOTOS_DIR/date_of_running, e.g. UPDATE_PHOTOS_DIR/08012024
+- Use /faiss/get_folder_embeddings by putting into new_photos_dir the name of of the directory where you placed photos (not whole path)
+- To create new index pass the name of the photo directory to /faiss/create_new_index
 
 ### Issues
 Sometimes you can encounter bbox errors. One solution can be to:
@@ -15,24 +23,24 @@ Sometimes you can encounter bbox errors. One solution can be to:
   > python setup.py build_ext --inplace
 
 ### CHANGE HISTORY (started this in 16.12.2023)
-- 16.12.2022 - function to get embeddings from a given folder
+- 16.12.2022 - function to get embeddings from a given folder (name of the folder better be date)
+- 01.01.2024 - function to create index from given directory with pickles from different iterations
+- 02.01.2024 - function to get a list of ids from table and create a new faiss index according to it using previous pickles
 
 ### Main idea
-I will be given a list of new unique_ids, but in this list there also exist old ids. I have to keep old (non-changed) ids 
-and vectorize new ones. So, I have to get new ids from the given list, by comparing it with my old ones. 
+I will be given a table with mixed new and old people. I have to be given folder with new images to get embeddings. 
+At the end we should have updated table and updated according to this table faiss index.
 
 ### TO-DO
-- [ ] Get New IDs and subtract Old ones to get list of unique ids that you have to vectorize
-- [ ] Function to get embeddings from a given folder of face images
-- [ ] Function to save embeddings in chunks of 10000 in pickle files (unique_id, vector) in a /PICKLES/date folder
-- [ ] Function to create FAISS index by reading chunked (10000) embeddings from some folder
-- [ ] Function to create FAISS index from two given folders (previous and current) - include in a final.index only those that are in a new table
-- [ ] Function to get embeddings from a given paths of face images
-- [ ] Add docker images to docker hub and update readme
+- [x] Function to get embeddings from a given folder of face images
+- [x] Function to save embeddings in chunks of 10000 in pickle files (unique_id, vector) in a /PICKLES/date folder
+- [x] Function to create FAISS index by reading chunked (10000) embeddings from some folder
+- [x] Function to create FAISS index from given directory with pickles - include in a final index only those that are in a new table
+- [x] Add docker images to docker hub and update readme
 - [ ] Create documentation (dev, user)
 - [ ] Try ScaNN
 - [ ] Finish unit-tests
-- [ ] Write comments for each function
+- [x] Write comments to each function
 - [ ] Refine code (object reusability, client creation, database connection, configs)
 - [ ] Add Metadata and Docs descriptions according to [FastAPI Docs](https://fastapi.tiangolo.com/tutorial/metadata/)
 - [ ] Add scaNN search functionality

@@ -8,17 +8,15 @@ services:
     volumes:
       - ./:/api_folder
       - /TENGRI:/TENGRI
-      - /PROJECTS/AI/dbscan_faiss_test:/sources_dir
       - /var/run/docker.sock:/var/run/docker.sock
-    network_mode: host
-    # ports:
-    #   - "20040:8887"
-    #   - "20041:8899"
+    # network_mode: host
+    ports:
+      - "20040:8887"
     shm_size: 1g
     ulimits:
       memlock: -1
       stack: 67108864
-    command: uvicorn main:app --host 0.0.0.0 --port 8887 --forwarded-allow-ips "*" --reload # --workers 6
+    command: uvicorn main:app --host 0.0.0.0 --port 8887 --forwarded-allow-ips "*" --reload --workers 6
     # command: tail -f /dev/null
     #command: sh -c "sleep 10s && uvicorn main:app --reload --host 0.0.0.0 --port 3333 --workers 10 --forwarded-allow-ips '*'"
     environment:
