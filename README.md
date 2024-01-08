@@ -4,7 +4,6 @@ The implementation of populating new face database using [Retinaface](https://do
 ### Installation
 > git clone https://github.com/Talgin/vector_db_api.git
 - Change settings.py to point to desired folders
-- Change settings.py to use either cpu or gpu (use_cpu flag)
 
 ### Running the service
 - Change PG_SERVER from settings.py to point to 127.0.0.1
@@ -20,7 +19,14 @@ The implementation of populating new face database using [Retinaface](https://do
 ### Issues
 Sometimes you can encounter bbox errors. One solution can be to:
   - Go to rcnn/cython and do (you have to have Cython package installed):
+  - uncomment the following line in docker-compose.yml (comment current uvicorn command)
+  > command: tail -f /dev/null
+  > docker-compose up -d
+  > docker exec -it mvd_vectorization_api bash
+  > cd /api_folder/app/facer/rcnn/cython
   > python setup.py build_ext --inplace
+  - This will build the package and .so files will appear in the same folder
+  - Now you can uncomment uvicorn line and down and up container again
 
 ### CHANGE HISTORY (started this in 16.12.2023)
 - 16.12.2022 - function to get embeddings from a given folder (name of the folder better be date)
