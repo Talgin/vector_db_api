@@ -84,8 +84,6 @@ async def faiss_create_new_index(response: Response, background_tasks: Backgroun
         name of the directory where all info of the current deltas stored
     index-size
         size of the newly created faiss index
-    images_to_process
-        amount of images to be processed
     """
     # Read ids from unique_ud_gr table to save only listed ids in a final index
     records_from_db = fs_worker.read_ids_from_postgres_db(settings.PG_SERVER, settings.PG_PORT, settings.PG_DB, 
