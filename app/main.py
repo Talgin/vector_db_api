@@ -92,36 +92,44 @@ async def faiss_create_new_index(response: Response, background_tasks: Backgroun
 
     updated_pickles_dir = os.path.join(settings.UPDATED_PICKLES_DIR, new_dir_name)
     if os.path.exists(updated_pickles_dir):
-        # Read previously obtained pickles
-        pickles_dict = fs_worker.read_pickles()
-        # Filter ids and vectors according to the list from Postgre table
-        filtered_dict = {key: pickles_dict[key] for key in records_from_db}
-        # new_ids, new_vectors
-        identificators = []
-        vectors = []
-        for k in filtered_dict.keys():
-            identificators.append(k)
-            vectors.append(filtered_dict[k])
-        # Formatting vectors and ids
-        vectors = np.array(vectors, dtype=np.float32)
-        identificators = np.array(list(map(int, identificators)))
-        # Directory to save new faiss index
-        new_faiss_index_dir = os.path.join(settings.UPDATED_FINAL_INDEX, new_dir_name)
-        if not os.path.exists(new_faiss_index_dir):
-            os.makedirs(new_faiss_index_dir)
-        try:
-            result = fs_worker.create_block_and_index(identificators, vectors, settings.TRAINED_INDEX_PATH, new_faiss_index_dir)
-        except:
-            result = False
-        if result['status'] == True:
-            return {'status': 'success', 'message': 'Successfully updated index', 'new_dir_name': new_dir_name, 'index-size': result['size'], 'new-index-path': result['path']}
-        else:
-            return {'status': 'error', 'message': 'Could not save new faiss in ' + new_faiss_index_dir}
+        # Run in the background because it will cause socket hang up Error
+        background_tasks.add_task(create_index, new_dir_name, records_from_db)
+        return {'status': 'success', 
+                'message': 'Sent to process', 
+                'Amount of records (DB)': len(records_from_db), 
+                'Pickles dir': updated_pickles_dir}
     else:
         response.status_code = status.HTTP_404_NOT_FOUND
-        return {'status': 'error', 'message': 'Could not find pickles in ' + updated_pickles_dir}
+        return {'status': 'error', 
+                'message': 'Could not find pickles in ' + updated_pickles_dir}
 
 
-
+def create_index(new_dir_name, records_from_db):
+    # Read previously obtained pickles
+    pickles_dict = fs_worker.read_pickles()
+    print('Pickles dict:', len(pickles_dict))
+    # Filter ids and vectors according to the list from Postgre table
+    filtered_dict = {key: pickles_dict[key] for key in records_from_db}
+    # new_ids, new_vectors
+    identificators = []
+    vectors = []
+    for k in filtered_dict.keys():
+        identificators.append(k)
+        vectors.append(filtered_dict[k])
+    # Formatting vectors and ids
+    vectors = np.array(vectors, dtype=np.float32)
+    identificators = np.array(list(map(int, identificators)))
+    # Directory to save new faiss index
+    new_faiss_index_dir = os.path.join(settings.UPDATED_FINAL_INDEX, new_dir_name)
+    if not os.path.exists(new_faiss_index_dir):
+        os.makedirs(new_faiss_index_dir)
+    try:
+        result = fs_worker.create_block_and_index(identificators, vectors, settings.TRAINED_INDEX_PATH, new_faiss_index_dir)
+    except:
+        result = {'status': False}
+    if result['status'] == True:
+        return {'status': 'success', 'message': 'Successfully updated index', 'new_dir_name': new_dir_name, 'index-size': result['size'], 'new-index-path': result['path']}
+    else:
+        return {'status': 'error', 'message': 'Could not save new faiss in ' + new_faiss_index_dir}
 
 

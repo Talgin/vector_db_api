@@ -39,7 +39,7 @@ class Faisser:
         # User glob to read recursively in subfolders
         data = None
         big_dict = dict()
-        for pickle_file in glob(self.updated_pickles_dir + '/**/**/*.pickle'):
+        for pickle_file in glob(self.updated_pickles_dir + '/**/**/*.pickle', recursive=True):
             with open(pickle_file,"rb") as f:
                 try:
                     data = pickle.load(f)
