@@ -11,8 +11,8 @@ services:
       - /new_tom:/new_tom
       - /var/run/docker.sock:/var/run/docker.sock
     network_mode: host
-    ports:
-      - "8887:8887"
+    #ports:
+    #  - "8887:8887"
     shm_size: 1g
     ulimits:
       memlock: -1
@@ -30,5 +30,5 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
+              device_ids: ['1']
               capabilities: [gpu]
